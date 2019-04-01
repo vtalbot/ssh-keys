@@ -54,7 +54,7 @@ class RegisterCommand extends Command
         }
 
         $userDetails = $process->getOutput();
-        preg_match('/^([^:]+:){5}(?P<path>[^:]+)/', $userDetails, $matches);
+        preg_match('/^([^:]*:){5}(?P<path>[^:]+)/', $userDetails, $matches);
 
         $homeDirectory = $matches['path'];
 
