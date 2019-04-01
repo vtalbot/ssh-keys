@@ -32,4 +32,9 @@ class GitHubProvider implements Provider
     {
         return $this;
     }
+
+    public function withUser(string $user): Provider
+    {
+        return $this;
+    }
 }

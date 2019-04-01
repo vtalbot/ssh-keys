@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Services\BitbucketProvider;
 use App\Services\GitHubProvider;
 use App\Services\GitLabProvider;
 use App\Services\Provider;
@@ -54,7 +55,7 @@ class SyncCommand extends Command
 
     private function performSync(string $user, array $config): void
     {
-        $provider = $this->makeProvider($config['provider'], $config['token'], Arr::get($config, 'url'));
+        $provider = $this->makeProvider($config['provider'], $config['token'], Arr::get($config, 'url'), Arr::get($config, 'user'));
 
         $keys = $provider->getSshKeys();
 
@@ -64,7 +65,7 @@ class SyncCommand extends Command
         $this->storeAuthorizedKeys($config['path'], $authorizedKeys);
     }
 
-    private function makeProvider(string $name, string $token, ?string $url = null): Provider
+    private function makeProvider(string $name, string $token, ?string $url = null, ?string $user = null): Provider
     {
         /** @var Provider $provider */
         if ($name === 'github') {
@@ -75,6 +76,10 @@ class SyncCommand extends Command
             if (null !== $url) {
                 $provider->withUrl($url);
             }
+        } elseif ($name === 'bitbucket') {
+            $provider = $this->app->make(BitbucketProvider::class);
+
+            $provider->withUser($user);
         }
 
         return $provider->withToken($token);

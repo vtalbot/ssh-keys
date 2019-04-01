@@ -21,10 +21,11 @@ class RegisterCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'register {provider : Service that will provide the keys [Github, GitLab]}
+    protected $signature = 'register {provider : Service that will provide the keys [Github, GitLab or Bitbucket]}
                                      {token : Personal access token with rights to read the SSH keys}
                                      {user : Local user that will be given the keys}
-                                     {--url= : Custom url for the provider}';
+                                     {--url= : Custom url for the provider}
+                                     {--user= : Custom user for the provider}';
 
     /**
      * The description of the command.
@@ -37,7 +38,7 @@ class RegisterCommand extends Command
     {
         $provider = $this->argument('provider');
 
-        if (!in_array($provider, ['github', 'gitlab'])) {
+        if (!in_array($provider, ['github', 'gitlab', 'bitbucket'])) {
             $this->error('The given provider is not supported. Please use "github" or "gitlab".');
             exit(1);
         }
@@ -75,6 +76,10 @@ class RegisterCommand extends Command
 
         if ($url = $this->option('url')) {
             $config['users']["{$user}-{$provider}"]['url'] = $url;
+        }
+
+        if ($customUser = $this->option('user')) {
+            $config['users']["{$user}-{$provider}"]['user'] = $customUser;
         }
 
         $this->storeConfig($config);
