@@ -23,7 +23,8 @@ class RegisterCommand extends Command
      */
     protected $signature = 'register {provider : Service that will provide the keys [Github, GitLab]}
                                      {token : Personal access token with rights to read the SSH keys}
-                                     {user : Local user that will be given the keys}';
+                                     {user : Local user that will be given the keys}
+                                     {--url= : Custom url for the provider}';
 
     /**
      * The description of the command.
@@ -56,7 +57,9 @@ class RegisterCommand extends Command
 
         $homeDirectory = $matches['path'];
 
-        $filesystem->makeDirectory(dirname($this->configPath()), 0755, true);
+        if (!$filesystem->exists(dirname($this->configPath()))) {
+            $filesystem->makeDirectory(dirname($this->configPath()), 0755, true);
+        }
 
         try {
             $config = $this->readConfig();
@@ -69,6 +72,10 @@ class RegisterCommand extends Command
             'token' => $token,
             'provider' => $provider,
         ];
+
+        if ($url = $this->option('url')) {
+            $config['users']["{$user}-{$provider}"]['url'] = $url;
+        }
 
         $this->storeConfig($config);
     }

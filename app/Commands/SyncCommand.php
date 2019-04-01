@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Services\GitHubProvider;
+use App\Services\GitLabProvider;
 use App\Services\Provider;
 use function array_unique;
 use function file_exists;
@@ -10,6 +11,7 @@ use function file_get_contents;
 use function file_put_contents;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use function implode;
 use LaravelZero\Framework\Commands\Command;
 
@@ -52,7 +54,7 @@ class SyncCommand extends Command
 
     private function performSync(string $user, array $config): void
     {
-        $provider = $this->makeProvider($config['provider'], $config['token']);
+        $provider = $this->makeProvider($config['provider'], $config['token'], Arr::get($config, 'url'));
 
         $keys = $provider->getSshKeys();
 
@@ -62,11 +64,17 @@ class SyncCommand extends Command
         $this->storeAuthorizedKeys($config['path'], $authorizedKeys);
     }
 
-    private function makeProvider(string $name, string $token): Provider
+    private function makeProvider(string $name, string $token, ?string $url = null): Provider
     {
         /** @var Provider $provider */
         if ($name === 'github') {
             $provider = $this->app->make(GitHubProvider::class);
+        } elseif ($name === 'gitlab') {
+            $provider = $this->app->make(GitLabProvider::class);
+
+            if (null !== $url) {
+                $provider->withUrl($url);
+            }
         }
 
         return $provider->withToken($token);

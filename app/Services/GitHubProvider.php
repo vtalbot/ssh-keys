@@ -27,4 +27,9 @@ class GitHubProvider implements Provider
 
         return $this;
     }
+
+    public function withUrl(string $url): Provider
+    {
+        return $this;
+    }
 }
